@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import LoginPage from "./pages/auth/LoginPage";
 import Employees from "./pages/employee/Employees";
 import EmployeeProfile from "./pages/employee/EmployeeProfile";
+import ClientPage from "./pages/client/ClientPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 // Pages
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/employee-list" element={<EmployeeList />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees-profile" element={<EmployeeProfile />} />
+        <Route path="/client-profile" element={<ClientPage />} />
       </Route>
       {/* 🌐 Catch-all: redirect unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
