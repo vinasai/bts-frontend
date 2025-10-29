@@ -1,0 +1,118 @@
+/* styles/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* :root CSS vars (optional, for quick reuse in plain CSS) */
+:root {
+  --color-primary: #b3261e;
+  --color-ink: #111111;
+}
+
+/* Base: keep global fonts and text colors; Ant components will inherit */
+@layer base {
+  html,
+  body {
+    @apply font-sans text-ink bg-gray-50;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading text-ink;
+    letter-spacing: 0.02em; /* your 'wide' */
+  }
+
+  /* Global link style (default everywhere) */
+  a {
+    color: var(--color-primary);
+  }
+  a:hover {
+    color: rgb(179 38 30 / 0.8);
+    text-decoration: underline;
+  }
+
+  /* --- EXCEPTIONS: NAV AREAS THAT SHOULD NOT INHERIT GLOBAL LINK HOVER --- */
+
+  /* 1) Sidebar: keep links white and never underline */
+  .sidebar a,
+  .sidebar a:visited {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  .sidebar a:hover,
+  .sidebar a:focus,
+  .sidebar a:active {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* 2) Optional utility: apply to any nav container to suppress global link styles */
+  .navlink-reset a,
+  .navlink-reset a:visited {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+  .navlink-reset a:hover,
+  .navlink-reset a:focus,
+  .navlink-reset a:active {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
+
+/* Components: keep only neutral helpers that won’t fight AntD */
+@layer components {
+  .container-app {
+    @apply w-full max-w-container mx-auto px-4;
+  }
+
+  /* If you plan to use Ant Design Button/Card, remove custom .btn-* and .card */
+  /* If you want a small helper for spacing around Ant blocks, keep it generic: */
+  .app-section {
+    @apply my-6;
+  }
+
+  .text-title {
+    @apply font-heading text-2xl md:text-3xl lg:text-4xl tracking-wide;
+  }
+  .text-subtitle {
+    @apply font-heading text-lg md:text-xl tracking-wide;
+  }
+  .text-body {
+    @apply font-sans text-base md:text-lg leading-relaxed;
+  }
+  .text-small {
+    @apply font-sans text-sm md:text-base leading-snug;
+  }
+
+  .photos-uploader {
+    /* tune if you change sizes */
+    --thumb: 104px; /* default picture-card thumbnail size */
+    --select: 32px; /* AntD Select size="small" height */
+    --gap: 12px; /* spacing between thumb and Select */
+  }
+
+  /* AntD v5 uses `.ant-upload-list-item-container`; some builds still emit
+     `.ant-upload-list-picture-card-container` — target both. */
+  .photos-uploader
+    .ant-upload-list-picture-card
+    .ant-upload-list-item-container,
+  .photos-uploader .ant-upload-list-picture-card-container {
+    height: calc(var(--thumb) + var(--select) + var(--gap));
+    margin-bottom: 40px;
+  }
+
+  /* Keep the actual thumbnail at the default size */
+  .photos-uploader .ant-upload-list-picture-card .ant-upload-list-item {
+    width: var(--thumb);
+    height: var(--thumb);
+  }
+
+  /* Ensure dropdowns aren't clipped by the list wrapper */
+  .photos-uploader .ant-upload-list {
+    overflow: visible;
+  }
+}
