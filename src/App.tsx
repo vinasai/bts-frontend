@@ -7,6 +7,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 
 // Auth / Utils
 import LoginPage from "./pages/auth/LoginPage";
+import Employees from "./pages/employee/Employees";
+import EmployeeProfile from "./pages/employee/EmployeeProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleProtectedRoute from "./components/RoleProtectedRoute";
 // Pages
@@ -31,7 +33,11 @@ export default function App() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
       </Route>
-      
+      <Route element={<DashboardLayout />}>
+        <Route path="/employee-list" element={<EmployeeList />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/employees-profile" element={<EmployeeProfile />} />
+      </Route>
       {/* 🌐 Catch-all: redirect unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

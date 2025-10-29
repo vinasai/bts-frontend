@@ -5,7 +5,8 @@
 
 /* :root CSS vars (optional, for quick reuse in plain CSS) */
 :root {
-  --color-primary: #b3261e;
+  --color-primary: #FF5734;
+  --color-secondary: #173f68;
   --color-ink: #111111;
 }
 
@@ -22,21 +23,18 @@
   h5,
   h6 {
     @apply font-heading text-ink;
-    letter-spacing: 0.02em; /* your 'wide' */
+    letter-spacing: 0.02em;
   }
 
-  /* Global link style (default everywhere) */
   a {
     color: var(--color-primary);
   }
   a:hover {
-    color: rgb(179 38 30 / 0.8);
+    color: rgb(255 87 52 / 0.8);
     text-decoration: underline;
   }
 
   /* --- EXCEPTIONS: NAV AREAS THAT SHOULD NOT INHERIT GLOBAL LINK HOVER --- */
-
-  /* 1) Sidebar: keep links white and never underline */
   .sidebar a,
   .sidebar a:visited {
     color: inherit !important;
@@ -49,7 +47,6 @@
     text-decoration: none !important;
   }
 
-  /* 2) Optional utility: apply to any nav container to suppress global link styles */
   .navlink-reset a,
   .navlink-reset a:visited {
     color: inherit !important;
@@ -63,14 +60,12 @@
   }
 }
 
-/* Components: keep only neutral helpers that won’t fight AntD */
+/* Components */
 @layer components {
   .container-app {
     @apply w-full max-w-container mx-auto px-4;
   }
 
-  /* If you plan to use Ant Design Button/Card, remove custom .btn-* and .card */
-  /* If you want a small helper for spacing around Ant blocks, keep it generic: */
   .app-section {
     @apply my-6;
   }
@@ -89,14 +84,11 @@
   }
 
   .photos-uploader {
-    /* tune if you change sizes */
-    --thumb: 104px; /* default picture-card thumbnail size */
-    --select: 32px; /* AntD Select size="small" height */
-    --gap: 12px; /* spacing between thumb and Select */
+    --thumb: 104px;
+    --select: 32px;
+    --gap: 12px;
   }
 
-  /* AntD v5 uses `.ant-upload-list-item-container`; some builds still emit
-     `.ant-upload-list-picture-card-container` — target both. */
   .photos-uploader
     .ant-upload-list-picture-card
     .ant-upload-list-item-container,
@@ -105,13 +97,11 @@
     margin-bottom: 40px;
   }
 
-  /* Keep the actual thumbnail at the default size */
   .photos-uploader .ant-upload-list-picture-card .ant-upload-list-item {
     width: var(--thumb);
     height: var(--thumb);
   }
 
-  /* Ensure dropdowns aren't clipped by the list wrapper */
   .photos-uploader .ant-upload-list {
     overflow: visible;
   }

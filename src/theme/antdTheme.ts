@@ -4,7 +4,8 @@ import type { ThemeConfig } from "antd";
 export const antdTheme: ThemeConfig = {
   token: {
     // map to your Tailwind palette + fonts
-    colorPrimary: "#B3261E",
+    colorPrimary: "#FF5734",
+    colorInfo: "#173F68",
     colorText: "#111111",  
     colorTextHeading: "#111111",
     fontFamily: "DM Sans, sans-serif",
@@ -14,7 +15,7 @@ export const antdTheme: ThemeConfig = {
     Typography: {
       titleMarginBottom: 12,
       titleMarginTop: 0,
-      fontFamily: "Days One, sans-serif",
+      fontFamily: "Poppins, sans-serif",
     },
     Form: {
       marginLG: 8,

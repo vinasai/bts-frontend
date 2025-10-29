@@ -5,15 +5,15 @@ export default {
     extend: {
       fontFamily: {
         sans: ["DM Sans", "sans-serif"],
-        heading: ["Days One", "sans-serif"],
+        heading: ["Poppins", "sans-serif"],
       },
       colors: {
-        primary: "#B3261E",
-        secondary: "rgb(179 38 30 / 0.20)",
+        primary: "#FF5734",
+        secondary: "#173f68",
         ink: "#111111",
       },
       maxWidth: {
-        container: "1200px",
+        container: "1440px",
       },
       letterSpacing: {
         tighter: "-0.02em",

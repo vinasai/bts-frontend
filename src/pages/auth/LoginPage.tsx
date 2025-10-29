@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Alert, App } from "antd";
 import { useAuth } from "../../contexts/AuthContext";
-import loginImg from "../../assets/images/Login.png";
+// import loginImg from "../../assets/images/Login.png";
 
 import Input, { PasswordInput } from "../../components/Input";
 import Button from "../../components/Button";
@@ -41,7 +41,7 @@ export default function LoginPage() {
       {/* Left visual */}
       <div className="hidden md:block relative h-full overflow-hidden rounded-l-2xl">
         <img
-          src={loginImg}
+          src={"https://images.pexels.com/photos/1054655/pexels-photo-1054655.jpeg"}
           alt="Login visual"
           className="h-full w-full object-cover object-center"
         />
