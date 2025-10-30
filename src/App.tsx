@@ -43,6 +43,7 @@ export default function App() {
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/add" element={<AddClient />} />
         <Route path="/client-profile" element={<ClientPage />} />
+        <Route path="/qr-board" element={<QRBoard />} />
       </Route>
       {/* 🌐 Catch-all: redirect unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
