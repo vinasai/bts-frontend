@@ -25,6 +25,8 @@ import MyWFH from "./pages/dashboard/MyWFH";
 import AdminWFH from "./pages/dashboard/AdminWFH";
 import QRBoard from "./pages/qr/QRBoard";
 import AttendancePage from "./pages/auth/AttendancePage";
+import Clients from "./pages/clients/Clients";
+import AddClient from "./pages/clients/AddClients";
 
 export default function App() {
   return (
@@ -37,6 +39,8 @@ export default function App() {
         <Route path="/employee-list" element={<EmployeeList />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees-profile" element={<EmployeeProfile />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/clients/add" element={<AddClient />} />
       </Route>
       {/* 🌐 Catch-all: redirect unknown routes */}
       <Route path="*" element={<Navigate to="/" replace />} />
