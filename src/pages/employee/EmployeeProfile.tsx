@@ -24,7 +24,6 @@ const MOCK_MODE = true;
 function makeMockEmployee(id = "emp_0007"): Employee {
   return {
     id,
-    avatarUrl: "",
     firstName: "Sarah",
     lastName: "Johnson",
     gender: "Female",
@@ -281,7 +280,7 @@ export default function EmployeeProfile() {
             setActiveKey(k);
             setEdit(false);
           }}
-          destroyOnHide
+          destroyOnHidden
           items={[
             {
               key: "details",
