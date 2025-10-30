@@ -87,29 +87,29 @@ axiosInstance.interceptors.request.use((config) => {
 
 
 // 🔄 Response interceptor for token refresh
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config as typeof error.config & { _retry?: boolean };
 
-//     if (
-//       error.response?.status === 401 &&
-//       !originalRequest._retry &&
-//       window.location.pathname !== "/login"
-//     ) {
-//       originalRequest._retry = true;
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      window.location.pathname !== "/login"
+    ) {
+      originalRequest._retry = true;
 
-//       try {
-//         await plainAxios.post("/auth/refresh");
-//         return axiosInstance(originalRequest);
-//       } catch (refreshError) {
-//         window.location.href = "/login";
-//         return Promise.reject(refreshError);
-//       }
-//     }
+      try {
+        await plainAxios.post("/auth/refresh");
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
+    }
 
-//     return Promise.reject(error);
-//   }
-// );
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;
