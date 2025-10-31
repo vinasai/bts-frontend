@@ -8,6 +8,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 // Auth / Utils
 import LoginPage from "./pages/auth/LoginPage";
 import Employees from "./pages/employee/Employees";
+import AddEmployees from "./pages/employee/AddEmployees";
 import EmployeeProfile from "./pages/employee/EmployeeProfile";
 import ClientPage from "./pages/client/ClientPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -39,6 +40,7 @@ export default function App() {
       <Route element={<DashboardLayout />}>
         <Route path="/employee-list" element={<EmployeeList />} />
         <Route path="/employees" element={<Employees />} />
+        <Route path="/employees/add" element={<AddEmployees />} />
         <Route path="/employees-profile" element={<EmployeeProfile />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/add" element={<AddClient />} />

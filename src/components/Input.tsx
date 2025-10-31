@@ -18,8 +18,14 @@ export function sanitizeText(
   {
     allowNewlines = false,
     maxLength,
-    preserveSpaces = false,
-  }: { allowNewlines?: boolean; maxLength?: number; preserveSpaces?: boolean } = {}
+    preserveSpaces = true,
+    trim = false,
+  }: {
+    allowNewlines?: boolean;
+    maxLength?: number;
+    preserveSpaces?: boolean;
+    trim?: boolean;
+  } = {}
 ) {
   if (value == null) return "";
   let v = String(value)
@@ -28,23 +34,18 @@ export function sanitizeText(
 
   if (!allowNewlines) v = v.replace(/\n+/g, " ");
   v = v.replace(/[<>`]/g, "");
-
-  // ✅ Convert tabs to spaces instead of keeping them invisible
   v = v.replace(/\t/g, " ");
-
-  // Remove other control characters
   v = v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
 
-  // ✅ Only collapse/truncate spaces if preserveSpaces is false
-  if (!preserveSpaces) v = v.replace(/\s{2,}/g, " ").trim();
+  // Only collapse spaces if asked
+  if (!preserveSpaces) v = v.replace(/\s{2,}/g, " ");
 
   if (typeof maxLength === "number" && v.length > maxLength)
     v = v.slice(0, maxLength);
+  if (trim) v = v.trim();
 
   return v;
 }
-
-
 
 export function validateEmail(value: string): boolean {
   // Conservative RFC5322-ish check; avoids catastrophic backtracking
@@ -104,12 +105,14 @@ export default function Input({
   ...props
 }: Props) {
   const [local, setLocal] = useState<string | undefined>(
-    typeof value === "string" ? sanitizeText(value) : (value as any)
+    typeof value === "string"
+      ? sanitizeText(value, { preserveSpaces: true })
+      : (value as any)
   );
 
-  // NEW: keep local in sync with Form value
   useEffect(() => {
-    if (typeof value === "string") setLocal(sanitizeText(value));
+    if (typeof value === "string")
+      setLocal(sanitizeText(value, { preserveSpaces: true }));
     else setLocal(value as any);
   }, [value]);
 
@@ -124,9 +127,10 @@ export default function Input({
         {...props}
         value={local}
         onChange={(e) => {
-          const sanitized = sanitizeText(e.target.value, { preserveSpaces: true });
+          const sanitized = sanitizeText(e.target.value, {
+            preserveSpaces: true,
+          });
           setLocal(sanitized);
-          // let Form capture the value (no extra error UI here)
           onChange?.({
             ...e,
             target: { ...e.target, value: sanitized },
@@ -373,8 +377,10 @@ export type MyTextAreaProps = Omit<AntTextAreaProps, "value" | "onChange"> & {
   label?: string;
   value?: string;
   onChange?: (value: string) => void;
-  allowNewlines?: boolean; // keep newlines instead of collapsing
+  allowNewlines?: boolean;
   maxLength?: number;
+  preserveSpaces?: boolean;
+  trimOnBlur?: boolean;
 };
 
 export function TextArea({
@@ -384,6 +390,8 @@ export function TextArea({
   onChange,
   allowNewlines = true,
   maxLength,
+  preserveSpaces = true,
+  trimOnBlur = false,
   ...props
 }: MyTextAreaProps) {
   const [local, setLocal] = useState<string>(value || "");
@@ -403,14 +411,19 @@ export function TextArea({
         {...props}
         value={local}
         onChange={(e) => {
-          const v = sanitizeText(e.target.value, { allowNewlines });
+          const v = sanitizeText(e.target.value, {
+            allowNewlines,
+            preserveSpaces,
+          });
           const limited =
             typeof maxLength === "number" ? v.slice(0, maxLength) : v;
           setLocal(limited);
           onChange?.(limited);
         }}
         onBlur={() =>
-          setLocal((v) => sanitizeText(v, { allowNewlines }).trim())
+          setLocal((v) =>
+            sanitizeText(v, { allowNewlines, preserveSpaces, trim: trimOnBlur })
+          )
         }
         className={baseClasses(className)}
         autoSize={{ minRows: 3 }}
