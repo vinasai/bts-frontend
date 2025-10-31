@@ -43,23 +43,27 @@ export default function LoginPage() {
   const [form] = Form.useForm();
   const { message } = App.useApp();
 
-  const onFinish = async (values: { username: string; password: string }) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await login(values.username, values.password);
-      if (result.success) {
-        message.success("Welcome back!");
-        navigate("/");
-      } else {
-        setError(result.message || "Login failed");
-      }
-    } catch (err: any) {
-      setError(err?.message || "Login failed");
-    } finally {
-      setLoading(false);
+// In your LoginPage component, update the onFinish function:
+const onFinish = async (values: { username: string; password: string }) => {
+  setLoading(true);
+  setError(null);
+  try {
+    const result = await login(values.username, values.password);
+    if (result.success) {
+      message.success("Welcome back!");
+      navigate("/");
+    } else {
+      setError(result.message || "Login failed");
     }
-  };
+  } catch (err: any) {
+    // This catch might not be needed since login() already catches errors,
+    // but keeping it for safety
+    const message = err.response?.data?.error || "Login failed";
+    setError(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="relative h-full">
