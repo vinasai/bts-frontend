@@ -41,7 +41,7 @@ export default function App() {
         <Route path="/employee-list" element={<EmployeeList />} />
         <Route path="/employees" element={<Employees />} />
         <Route path="/employees/add" element={<AddEmployees />} />
-        <Route path="/employees-profile" element={<EmployeeProfile />} />
+        <Route path="/employees/:id" element={<EmployeeProfile />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/add" element={<AddClient />} />
         <Route path="/client-profile" element={<ClientPage />} />

@@ -1,22 +1,21 @@
 export type EmpStatus = "Active" | "Inactive" | "Probation";
 
-export type Employee = {
+export type StaffProfile = {
   id: string;
-  avatarUrl?: string;
+  userId: string | null;
+  employeeId: string;
   firstName: string;
   lastName: string;
-  gender?: "Male" | "Female" | "Other";
-  role: string;
-  department: string;
-  email: string;
-  phone: string;
-  address?: string;
-  dob?: string;
-  status: EmpStatus;
-  salary?: number;
-  hireDate?: string;
-  reportsTo?: string;
-  joinedAgo?: string;
+  username: string | null;
+  email: string | null;
+  isLogin: boolean;
+  birthday: string | null;
+  joiningDate: string | null;
+  contactNumbers: string[];
+  primaryContact: string | null;
+  createdByName: string | null;
+  updatedByName: string | null;
+  role: string | null;
 };
 
 export type ProjectRow = {

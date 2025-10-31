@@ -18,7 +18,7 @@ import Input, {
 import axiosInstance from "../../utils/axiosInstance";
 import OutlineSweepButton from "../../components/OutlineSweepButton";
 import { DatePicker } from "antd";
-import type { Dayjs } from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import { TORONTO_TZ, getTorontoToday, toToronto } from "../../utils/time";
 
 /* ----------------------------------------------------------------------------
@@ -32,9 +32,9 @@ type FormValues = {
   // Personal
   firstName: string;
   lastName: string;
-  email?: string;
-  birthday?: string; // YYYY-MM-DD
-  joiningDate?: string; // YYYY-MM-DD
+  email: string;
+  birthday: string; // YYYY-MM-DD
+  joiningDate: string; // YYYY-MM-DD
 
   // Contacts
   contactNo: string[]; // at least one valid Canadian number
@@ -46,14 +46,14 @@ type FormValues = {
 
 const DATE_FMT = "YYYY-MM-DD";
 
-/** For DatePicker -> form: Dayjs -> "YYYY-MM-DD" in Toronto */
+/** DatePicker → form: Dayjs -> "YYYY-MM-DD" */
 function pickToIso(d: Dayjs | null) {
-  return d ? d.tz(TORONTO_TZ).format(DATE_FMT) : undefined;
+  return d ? d.format(DATE_FMT) : undefined;
 }
 
-/** For form -> DatePicker: "YYYY-MM-DD" -> Dayjs in Toronto */
+/** form → DatePicker: "YYYY-MM-DD" -> Dayjs */
 function isoToPick(v?: string) {
-  return v ? toToronto(v) : null;
+  return v ? dayjs(v, DATE_FMT) : null;
 }
 
 /** Disable future days for birthday (Toronto local) */
@@ -77,22 +77,22 @@ export default function AddEmployees() {
 
   async function onSave(values: FormValues) {
     const contactNo = normalizeContacts(values.contactNo);
-    if (!contactNo.some((v) => validateCanadianPhone(v))) {
-      message.error("Enter at least one valid Canadian phone number");
+    const firstValid = contactNo.find((v) => validateCanadianPhone(v))!;
+    if (!firstValid) {
+      message.error("Enter at least one valid phone number");
       return;
     }
 
-    // API wants: username, password, firstName, lastName, contactNo (string[]), primaryContact, birthday, joiningDate
     const payload = {
       username: values.username.trim(),
       password: values.password,
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
       contactNo,
-      primaryContact: contactNo[0], // first valid as primary
-      birthday: values.birthday || null,
-      joiningDate: values.joiningDate || null,
-      email: (values.email ?? "").trim() || null,
+      primaryContact: firstValid,
+      birthday: values.birthday,
+      joiningDate: values.joiningDate,
+      email: values.email.trim(),
     };
 
     try {
@@ -139,7 +139,7 @@ export default function AddEmployees() {
           layout="vertical"
           form={form}
           onFinish={handleSubmit}
-          requiredMark={false}
+          requiredMark="optional"
           initialValues={{ contactNo: [""] }}
         >
           {/* ======================= Account ======================= */}
@@ -264,44 +264,16 @@ export default function AddEmployees() {
               </Form.Item>
             </Col>
 
-            {/* Email (UI only) */}
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Email"
-                name="email"
-                getValueFromEvent={(e: any) => {
-                  if (e && typeof e === "object" && "target" in e) {
-                    return (e.target?.value ?? "").trim();
-                  }
-                  if (typeof e === "string") return e.trim();
-                  return "";
-                }}
-                rules={[
-                  { required: false },
-                  {
-                    validator: async (_, v?: string) => {
-                      const s = (v ?? "").trim();
-                      if (!s) return;
-                      if (!validateEmail(s))
-                        throw new Error("Enter a valid email address");
-                    },
-                  },
-                ]}
-              >
-                <EmailInput
-                  placeholder="name@example.com"
-                  autoComplete="email"
-                />
-              </Form.Item>
-            </Col>
-
             <Col xs={24} md={12}>
               <Form.Item
                 name="birthday"
                 label="Birthday"
-                tooltip="Pick a date (Toronto time); future dates are disabled"
+                tooltip="Pick a date; future dates are disabled"
                 getValueFromEvent={(d: Dayjs | null) => pickToIso(d)}
                 getValueProps={(v?: string) => ({ value: isoToPick(v) })}
+                rules={[
+                  { required: true, message: "Please select a birthday" },
+                ]}
               >
                 <DatePicker
                   style={{ width: "100%" }}
@@ -316,10 +288,11 @@ export default function AddEmployees() {
               <Form.Item
                 name="joiningDate"
                 label="Joining Date"
-                tooltip="Pick a date (Toronto time); can be in the future"
+                tooltip="Pick a date"
                 getValueFromEvent={(d: Dayjs | null) => pickToIso(d)}
                 getValueProps={(v?: string) => ({ value: isoToPick(v) })}
                 rules={[
+                  { required: true, message: "Please select a joining date" },
                   {
                     validator: async (_, v?: string) => {
                       if (!v) return;
@@ -355,96 +328,143 @@ export default function AddEmployees() {
 
           <Row gutter={[16, 8]}>
             <Col xs={24} md={12}>
-              <Form.List
-                name="contactNo"
+              <Form.Item label="Contact No" required className="!mb-0">
+                <Form.List
+                  name="contactNo"
+                  rules={[
+                    {
+                      validator: async (_, value) => {
+                        const arr: string[] = Array.isArray(value) ? value : [];
+                        if (!arr.some((v) => v && validateCanadianPhone(v))) {
+                          throw new Error(
+                            "Enter at least one valid phone number"
+                          );
+                        }
+                      },
+                    },
+                    {
+                      // duplicates: digits-only compare at the list level
+                      validator: async (_, value) => {
+                        const arr: string[] = (
+                          Array.isArray(value) ? value : []
+                        )
+                          .map((v) => (v ?? "").replace(/\D/g, ""))
+                          .filter(Boolean);
+                        if (new Set(arr).size !== arr.length) {
+                          throw new Error(
+                            "Duplicate phone numbers are not allowed"
+                          );
+                        }
+                      },
+                    },
+                  ]}
+                >
+                  {(fields, { add, remove }, { errors }) => (
+                    <>
+                      {/* Inputs */}
+                      {fields.map((field, idx) => (
+                        <div
+                          key={field.key}
+                          className="flex gap-2 mb-2 items-center"
+                        >
+                          <Form.Item
+                            {...field}
+                            noStyle
+                            validateTrigger={["onBlur", "onSubmit"]}
+                            rules={[
+                              {
+                                validator: async (_, value: string) => {
+                                  const s = (value ?? "").trim();
+
+                                  if (fields.length === 1) {
+                                    if (!validateCanadianPhone(s))
+                                      throw new Error(
+                                        "Enter a valid phone number"
+                                      );
+                                    return;
+                                  }
+                                  if (!s) return;
+
+                                  if (!validateCanadianPhone(s))
+                                    throw new Error(
+                                      "Enter a valid phone number"
+                                    );
+                                },
+                              },
+                            ]}
+                          >
+                            <PhoneInputCanada
+                              className="flex-1"
+                              placeholder={
+                                idx === 0 ? "(###) ###-####" : "Add another..."
+                              }
+                            />
+                          </Form.Item>
+
+                          {fields.length > 1 && (
+                            <Button
+                              type="text"
+                              shape="circle"
+                              aria-label="Remove contact"
+                              onClick={() => remove(field.name)}
+                              icon={<DeleteOutlined />}
+                              className="!p-1"
+                            />
+                          )}
+                        </div>
+                      ))}
+
+                      {/* Info (left) + Add (right) */}
+                      <div className="flex justify-between items-center mt-1">
+                        <Tooltip title="The first valid number will be set as primary.">
+                          <InfoCircleOutlined className="text-gray-500" />
+                        </Tooltip>
+
+                        <Button
+                          type="primary"
+                          size="small"
+                          aria-label="Add contact"
+                          icon={<PlusOutlined style={{ color: "#fff" }} />}
+                          onClick={() => add("")}
+                        />
+                      </div>
+
+                      <Form.ErrorList errors={errors} />
+                    </>
+                  )}
+                </Form.List>
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item
+                label="Email"
+                name="email"
+                className="!mb-0"
+                getValueFromEvent={(e: any) => {
+                  if (e && typeof e === "object" && "target" in e) {
+                    return (e.target?.value ?? "").trim();
+                  }
+                  if (typeof e === "string") return e.trim();
+                  return "";
+                }}
                 rules={[
+                  { required: true, message: "Please enter an email address" },
                   {
-                    validator: async (_, value) => {
-                      const arr: string[] = Array.isArray(value) ? value : [];
-                      if (!arr.some((v) => v && validateCanadianPhone(v))) {
-                        throw new Error(
-                          "Enter at least one valid Canadian phone number"
-                        );
-                      }
+                    validator: async (_, v?: string) => {
+                      const s = (v ?? "").trim();
+                      if (!s) return;
+                      if (!validateEmail(s))
+                        throw new Error("Enter a valid email address");
                     },
                   },
                 ]}
               >
-                {(fields, { add, remove }, { errors }) => (
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="ant-form-item-required">
-                        Contact No
-                      </label>
-                      <Button
-                        type="primary"
-                        shape="circle"
-                        size="small"
-                        aria-label="Add contact"
-                        icon={<PlusOutlined style={{ color: "#fff" }} />}
-                        onClick={() => add("")}
-                        className="!p-0"
-                      />
-                    </div>
-
-                    {fields.map((field, idx) => (
-                      <div
-                        key={field.key}
-                        className="flex gap-2 mb-2 items-center"
-                      >
-                        <Form.Item
-                          {...field}
-                          validateTrigger={["onBlur", "onSubmit"]}
-                          rules={[
-                            {
-                              validator: async (_, value: string) => {
-                                const s = (value ?? "").trim();
-                                if (fields.length === 1) {
-                                  if (!validateCanadianPhone(s)) {
-                                    throw new Error(
-                                      "Enter a valid Canadian phone number (Canada only)"
-                                    );
-                                  }
-                                  return;
-                                }
-                                if (!s) return; // allow blank extras
-                                if (!validateCanadianPhone(s)) {
-                                  throw new Error(
-                                    "Enter a valid Canadian phone number (Canada only)"
-                                  );
-                                }
-                              },
-                            },
-                          ]}
-                          className="flex-1 !mb-0"
-                        >
-                          <PhoneInputCanada
-                            placeholder={
-                              idx === 0 ? "(###) ###-####" : "Add another..."
-                            }
-                          />
-                        </Form.Item>
-
-                        {fields.length > 1 && (
-                          <Button
-                            type="text"
-                            shape="circle"
-                            aria-label="Remove contact"
-                            onClick={() => remove(field.name)}
-                            icon={<DeleteOutlined />}
-                            className="!p-1"
-                          />
-                        )}
-                      </div>
-                    ))}
-
-                    <Form.ErrorList errors={errors} />
-                    <Tooltip title="The first valid number will be set as primary.">
-                      <InfoCircleOutlined className="text-gray-500" />
-                    </Tooltip>
-                  </div>
-                )}
-              </Form.List>
+                <EmailInput
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                />
+              </Form.Item>
             </Col>
           </Row>
         </Form>
